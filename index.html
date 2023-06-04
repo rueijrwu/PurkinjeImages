@@ -2,43 +2,20 @@
     <head>
         <title>Bokeh Example</title>
         <meta charset="iso-8859-1" />
-        <link rel="icon" type="image/x-icon" href="./favicon.png" />
-        <script
-            type="text/javascript"
-            src="https://cdn.bokeh.org/bokeh/release/bokeh-3.0.3.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.0.3.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.0.3.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.0.3.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.0.3.min.js"
-        ></script>
+        <script type="text/javascript" src="./assets/js/bokeh-3.1.1.min.js"></script>
+        <script type="text/javascript" src="./assets/js/bokeh-gl-3.1.1.min.js"></script>
+        <script type="text/javascript" src="./assets/js/bokeh-widgets-3.1.1.min.js"></script>
+        <script type="text/javascript" src="./assets/js/bokeh-tables-3.1.1.min.js"></script>
+        <script type="text/javascript" src="./assets/js/bokeh-mathjax-3.1.1.min.js"></script>
 
-        <script type="text/javascript">
-            Bokeh.set_log_level("info");
-        </script>
-        <link
-            rel="stylesheet"
-            href="https://pyscript.net/latest/pyscript.css"
-        />
-
-        <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-        <link rel="stylesheet" href="./assets/css/examples.css" />
+        <script defer src="./assets/js/pyscript.js"></script>
+        <link rel="stylesheet" href="./assets/css/pyscript.css"/>
+        <link rel="stylesheet" href="./assets/css/style.css" />
     </head>
     <body>
         <py-tutor>
             <section class="pyscript">
-                <div id="myplot"></div>
+                <div id="myplot" tyle="width:100vw"></div>
 
                 <py-config>
                     packages = [
@@ -68,9 +45,9 @@
                     p = figure(
                       title="Simple line example", 
                       x_axis_label='x', 
-                      y_axis_label='y',
-                      width=400, height=400)
-
+                      y_axis_label='y')
+                    p.sizing_mode = 'scale_width'
+                    
                     # add a circle renderer with x and y coordinates, size, color, and alpha
                     p.line(x, y, legend_label="Temp.", line_width=2)
                     p_json = json.dumps(json_item(p, "myplot"))
