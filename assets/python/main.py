@@ -1,12 +1,15 @@
+#%%
 import json
 import pyodide
 import numpy as np
-
 from js import Bokeh, console, JSON
 
+#%%
 from bokeh.embed import json_item
 from bokeh.plotting import figure
 from bokeh.resources import CDN
+from bokeh.embed import components
+from bokeh.embed import file_html
 
 # data
 x = np.linspace(0, np.pi, num=50)
@@ -23,6 +26,17 @@ p = figure(
 
 # add a circle renderer with x and y coordinates, size, color, and alpha
 p.line(x, y, legend_label="Temp.", line_width=2)
-p_json = json.dumps(json_item(p, "myplot"))
 
+#%%
+p_json = json.dumps(json_item(p, "myplot"))
 Bokeh.embed.embed_item(JSON.parse(p_json))
+
+#%%
+#script, div = components(p)
+
+#%%
+# html = file_html(p, CDN, "linechart")
+# newfile = open('line.html', 'w')
+# newfile.write(html)
+# newfile.close()
+
