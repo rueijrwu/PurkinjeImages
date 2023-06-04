@@ -1,33 +1,83 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <title>Hello World Example</title>
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="." />
-    <meta property="og:title" content="Hello World" />
-    <script src="https://cdn.jsdelivr.net/pyodide/dev/full/pyodide.js"></script>
-    <style>
-      body, button {
-        font-size: 300%;
-      }
-    </style>
-  </head>
-  <body>
-    <button id="example" onclick="helloWorld()">Hello World</button>
-    <div id="status">Loading</div>
-    <script type="text/javascript">
-      function status(x) {
-          document.getElementById("status").innerText = x;
-      }
-      async function helloWorld(){
-          status("Loading Pyodide, please wait");
-          let pyodide = await loadPyodide();
-          console.log(pyodide.runPython("\" \".join([\"Hello\",\"World\"])"));
-          status(pyodide.runPython("\" \".join([\"Hello\",\"World\"])"));
-      }
-      window.addEventListener("load", function() {
-          status("Press the Button!");
-      }, false);
-    </script>
-  </body>
+    <head>
+        <title>Bokeh Example</title>
+        <meta charset="iso-8859-1" />
+        <link rel="icon" type="image/x-icon" href="./favicon.png" />
+        <script
+            type="text/javascript"
+            src="https://cdn.bokeh.org/bokeh/release/bokeh-3.0.3.min.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.0.3.min.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.0.3.min.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.0.3.min.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.0.3.min.js"
+        ></script>
+
+        <script type="text/javascript">
+            Bokeh.set_log_level("info");
+        </script>
+        <link
+            rel="stylesheet"
+            href="https://pyscript.net/latest/pyscript.css"
+        />
+
+        <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+        <link rel="stylesheet" href="./assets/css/examples.css" />
+    </head>
+    <body>
+        <py-tutor>
+            <section class="pyscript">
+                <div id="myplot"></div>
+
+                <py-config>
+                    packages = [
+                      "numpy",
+                      "pandas",
+                      "bokeh",
+                      "xyzservices"
+                    ]
+                </py-config>
+
+                <py-script id="main">
+                    import json
+                    import pyodide
+                    import numpy as np
+
+                    from js import Bokeh, console, JSON
+
+                    from bokeh.embed import json_item
+                    from bokeh.plotting import figure
+                    from bokeh.resources import CDN
+
+                    # data
+                    x = np.linspace(0, np.pi, num=50)
+                    y = np.sin(x)
+
+                    # create a new plot with default tools, using figure
+                    p = figure(
+                      title="Simple line example", 
+                      x_axis_label='x', 
+                      y_axis_label='y',
+                      width=400, height=400)
+
+                    # add a circle renderer with x and y coordinates, size, color, and alpha
+                    p.line(x, y, legend_label="Temp.", line_width=2)
+                    p_json = json.dumps(json_item(p, "myplot"))
+
+                    Bokeh.embed.embed_item(JSON.parse(p_json))
+                </py-script>
+            </section>
+        </py-tutor>
+    </body>
 </html>
