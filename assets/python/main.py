@@ -17,7 +17,8 @@ p = figure(
     title="Simple line example", 
     x_axis_label='x', 
     y_axis_label='y',
-    #match_aspect=True,
+    width=400,
+    height=200,
     sizing_mode='scale_height')
 
 # add a circle renderer with x and y coordinates, size, color, and alpha
