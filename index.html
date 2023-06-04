@@ -15,7 +15,7 @@
     <body>
         <py-tutor>
             <section class="pyscript">
-                <div id="myplot" tyle="width:100vw"></div>
+                <div id="myplot" style="width: 50vw; height: 50vh; margin: 0 auto"></div>
 
                 <py-config>
                     packages = [
@@ -45,8 +45,9 @@
                     p = figure(
                       title="Simple line example", 
                       x_axis_label='x', 
-                      y_axis_label='y')
-                    p.sizing_mode = 'scale_width'
+                      y_axis_label='y',
+                      #match_aspect=True,
+                      sizing_mode='scale_both')
                     
                     # add a circle renderer with x and y coordinates, size, color, and alpha
                     p.line(x, y, legend_label="Temp.", line_width=2)
