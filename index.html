@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello World Example</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="." />
+    <meta property="og:title" content="Hello World" />
+    <script src="https://cdn.jsdelivr.net/pyodide/dev/full/pyodide.js"></script>
+    <style>
+      body, button {
+        font-size: 300%;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="example" onclick="helloWorld()">Hello World</button>
+    <div id="status">Loading</div>
+    <script type="text/javascript">
+      function status(x) {
+          document.getElementById("status").innerText = x;
+      }
+      async function helloWorld(){
+          status("Loading Pyodide, please wait");
+          let pyodide = await loadPyodide();
+          console.log(pyodide.runPython("\" \".join([\"Hello\",\"World\"])"));
+          status(pyodide.runPython("\" \".join([\"Hello\",\"World\"])"));
+      }
+      window.addEventListener("load", function() {
+          status("Press the Button!");
+      }, false);
+    </script>
+  </body>
+</html>
