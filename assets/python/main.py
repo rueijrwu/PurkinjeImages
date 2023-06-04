@@ -19,7 +19,7 @@ p = figure(
     y_axis_label='y',
     width=400,
     height=200,
-    sizing_mode='scale_height')
+    sizing_mode='scale_both')
 
 # add a circle renderer with x and y coordinates, size, color, and alpha
 p.line(x, y, legend_label="Temp.", line_width=2)
