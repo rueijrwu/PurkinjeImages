@@ -18,7 +18,7 @@ p = figure(
     x_axis_label='x', 
     y_axis_label='y',
     #match_aspect=True,
-    sizing_mode='scale_both')
+    sizing_mode='scale_height')
 
 # add a circle renderer with x and y coordinates, size, color, and alpha
 p.line(x, y, legend_label="Temp.", line_width=2)
