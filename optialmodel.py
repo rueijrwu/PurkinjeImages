@@ -162,3 +162,51 @@ class PurkinjeModel:
                     val = -np.inf
                 rays[sIdx, int(oIdx / 6), oIdx % 6] = val
         return rays
+    
+    def getDummySurfaceProfiles(self, surfaces):
+        the_LDE = self.TheSystem.LDE
+        profiles = np.zeros([surfaces.size, 2, 2])
+        for sIdx, surf in enumerate(surfaces.tolist()):
+            # get global transformation
+            (valid, r11, r12, r13, r21, r22, r23, r31, r32, r33, x, y, z) = \
+                the_LDE.GetGlobalMatrix(surf)
+
+            # get SA
+            zsurf = the_LDE.GetSurfaceAt(surf)
+            sa = zsurf.GetCellAt(6).get_DoubleValue()
+
+            profiles[sIdx, :, 0] = z    
+            profiles[sIdx, :, 1] = [sa, -sa] 
+        return profiles
+        
+    # def getProfiles(self, surfaces, num=25, drawDummy=False):
+    #     the_LDE = self.TheSystem.LDE
+    #     HH = np.linspace(-1, 1, num=num)
+    #     profiles = np.zeros([surfaces.size, 3, num], dtype=np.double)
+
+    #     for sIdx, surf in enumerate(surfaces.tolist()):
+    #         zsurf = the_LDE.GetSurfaceAt(surf)
+
+    #         # get surface parameters
+    #         sa = zsurf.GetCellAt(6).get_DoubleValue()
+
+    #         # get global transformation
+    #         gdec = np.zeros([3, 1], dtype=np.double)
+    #         gtilt = np.identity(3, dtype=np.double)
+    #         (_,
+    #          gtilt[0, 0], gtilt[0, 1], gtilt[0, 2],
+    #          gtilt[1, 0], gtilt[1, 1], gtilt[1, 2],
+    #          gtilt[2, 0], gtilt[2, 1], gtilt[2, 2], 
+    #          gdec[0], gdec[1], gdec[2]) = the_LDE.GetGlobalMatrix(surf)
+
+    #         h = sa * HH
+    #         for idx in range(num):
+    #             hy = h[idx]
+    #             valid, sag, alt_sag = the_LDE.GetSag(surf, 0, hy)
+    #             if not valid:
+    #                 sag = None
+    #             local_pos = np.array([[0],[hy],[sag]], dtype=np.double)
+    #             global_pos = np.dot(gtilt, local_pos) + gdec
+
+    #             profiles[sIdx, :, idx] = global_pos.flatten()
+    #     return profiles

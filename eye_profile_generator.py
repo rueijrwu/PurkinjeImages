@@ -4,8 +4,8 @@ import pickle
 from bokeh.models import ColumnDataSource
 
 #%%
-data = np.load("./data/eye_profiles.npz")
-eye_profiles = data["eye_profiles"]
+eye_profiles = np.load("./data/eye_profiles.npy")
+
 ex = eye_profiles[:, 1, :]
 ey = eye_profiles[:, 0, :]
 EYE_ROTATION = np.linspace(-40, 40, 81)
@@ -25,7 +25,7 @@ eye_profile_data = {
     "Profile" : eye_profiles
 }
 
-outfile = "eye_profile.pk"
+outfile = "./data/eye_profile.pk"
 with open(outfile, 'wb') as handle:
     pickle.dump(
         eye_profile_data,

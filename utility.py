@@ -4,11 +4,12 @@ import operator
 from bokeh.models import ColumnDataSource
 import pickle
 
-def create_bokeh_rays(data, infinite_object=None):
+def create_bokeh_rays(data, reversed_y=False):
     rays = data["RAYS"]
     dim_value = data["DIM"]["Axis"].values()
     dim_code, dim_shape = data["DIM"]["Info"].values()
-
+    yscale = -1 if reversed_y else 1
+        
     source_rays_list = [ColumnDataSource(), ColumnDataSource()]
     dim_init_idx = None
     dim_init_name = None
@@ -28,12 +29,7 @@ def create_bokeh_rays(data, infinite_object=None):
             YY = []
             for tIdx in tIdices:
                 xx = rays[tuple(uIdx) + (slice(None), tIdx, 2)]
-                yy = rays[tuple(uIdx) + (slice(None), tIdx, 1)]
-                if infinite_object is not None:
-                    if np.isinf(xx[0]) :
-                        xx[0] = infinite_object
-                    if np.isinf(yy[0]) :
-                        yy[0] = infinite_object
+                yy = yscale * rays[tuple(uIdx) + (slice(None), tIdx, 1)]
                 XX.append(xx.tolist())
                 YY.append(yy.tolist())
             if len(XX) == 1:
@@ -49,12 +45,7 @@ def create_bokeh_rays(data, infinite_object=None):
             YY = []
             for tIdx in tIdices:
                 xx = rays[tuple(uIdx) + (slice(None), tIdx, 2)]
-                yy = rays[tuple(uIdx) + (slice(None), tIdx, 1)]
-                if infinite_object is not None:
-                    if np.isinf(xx[0]) :
-                        xx[0] = infinite_object
-                    if np.isinf(yy[0]) :
-                        yy[0] = infinite_object
+                yy = yscale *rays[tuple(uIdx) + (slice(None), tIdx, 1)]
                 XX.append(xx.tolist())
                 YY.append(yy.tolist())
             if len(XX) == 1:
@@ -105,54 +96,72 @@ def create_bokeh_eye_profile(data):
     source_eye.add(ey.tolist(), name="y")
     return source_eye
 
-# def save_bokeh_rays(
-#         filename, desc, init_dict, source_C_rays, source_M_rays):
-#     with open(filename, 'wb') as handle:
-#         pickle.dump(
-#             {
-#                 "Desc" : desc,
-#                 "InitialState" : init_dict,
-#                 "ChiefRays" : source_C_rays,
-#                 "MarginalRays" : source_M_rays
-#             },
-#             handle, protocol=pickle.HIGHEST_PROTOCOL)
-        
-# def save_bokeh_rays_from_raw(
-#         filename, data, infinite_object=None):
-#     init_dict, source_C_rays, source_M_rays = \
-#         create_bokeh_rays(
-#             data, 
-#             infinite_object=infinite_object
-#         )
+def create_bokeh_plane_profile_from_file(filename):
+    with open(filename, 'rb') as handle:
+        profile_data = pickle.load(handle)
+        return create_bokeh_plane_profile(profile_data)
 
-#     save_bokeh_rays(
-#         filename,
-#         data["DIM"],
-#         init_dict, 
-#         source_C_rays, 
-#         source_M_rays
-#     )
+def create_bokeh_plane_profile(data, margin=10):
+    source_plane = ColumnDataSource()
+    profiles = data["Profiles"]
+    stop = data["Stop"]
+    surfaces = data["Surfaces"]
+    IDX = surfaces != stop
+    xx = profiles[IDX, :, 0]
+    yy = profiles[IDX, :, 1] + np.copysign(margin, profiles[IDX, :, 1])
 
-# def read_bokeh_rays(filename):
-#     with open(filename, 'rb') as handle:
-#         data = pickle.load(handle)
-#         return data.values()
-    
+    IDX = ~IDX
+    sx = profiles[IDX, :, 0]
+    sy = profiles[IDX, :, 1].transpose()
+    sxx = np.vstack([sx, sx])
+    syy = np.hstack([sy, sy + np.copysign(margin, sy)])
 
-#
-# out_data = {
-#     "RAYS" : rays,
-#     "DIM" : {
-#         "Axis" : {
-#             "SourceAngle" : SOURCE_ANGLE,
-#             "EyeRotation" : ROTATIONS
-#         },
-#         "Info" : {
-#             "Code" : "SA{:d}ER{:d}",
-#             "Shape" : [SOURCE_ANGLE.size, ROTATIONS.size]
-#         }
-#     },
-#     "INFO" : {
-#         "SurfaceIndex" : SURFACES
-#     }
-# }
+    XX = np.concatenate([xx, sxx])
+    YY = np.concatenate([yy, syy])
+    source_plane.add(XX.tolist(), name="x")
+    source_plane.add(YY.tolist(), name="y")
+    return source_plane
+
+def mirror_source(rays_data):
+    #%%
+    rays = rays_data["RAYS"]
+    SOURCE_ANGLE, EYE_ROTATION = rays_data["DIM"]["Axis"].values()
+
+    #%%
+    MID_SOURCE = SOURCE_ANGLE.size - 1
+    MID_ROT = int((EYE_ROTATION.size - 1)/2)
+
+    shape = list(rays.shape)
+    shape[0] = int(2 * MID_SOURCE + 1)
+    new_rays = np.zeros(shape, dtype=rays.dtype)
+    new_rays[MID_SOURCE:] = rays
+
+    NEW_SOURCE_ANGLE = np.zeros([shape[0],], dtype=SOURCE_ANGLE.dtype)
+    for sIdx in range(MID_SOURCE+1):
+        NEW_SOURCE_ANGLE[MID_SOURCE-sIdx] = -SOURCE_ANGLE[sIdx]
+        for rIdx in range(EYE_ROTATION.size):
+            new_rays[MID_SOURCE-sIdx, rIdx, :, :, 0] = rays[sIdx, -1-rIdx, :, :, 0]
+            new_rays[MID_SOURCE-sIdx, rIdx, :, :, 1] = -rays[sIdx, -1-rIdx, :, :, 1]
+            new_rays[MID_SOURCE-sIdx, rIdx, :, :, 2] = rays[sIdx, -1-rIdx, :, :, 2]
+            new_rays[MID_SOURCE-sIdx, rIdx, :, :, 3] = rays[sIdx, -1-rIdx, :, :, 3]
+            new_rays[MID_SOURCE-sIdx, rIdx, :, :, 4] = -rays[sIdx, -1-rIdx, :, :, 4]
+            new_rays[MID_SOURCE-sIdx, rIdx, :, :, 5] = rays[sIdx, -1-rIdx, :, :, 5]
+    NEW_SOURCE_ANGLE[MID_SOURCE:] = SOURCE_ANGLE
+
+    new_rays_data = {
+        "RAYS" : new_rays,
+        "DIM" : {
+            "Axis" : {
+                "SourceAngle" : NEW_SOURCE_ANGLE,
+                "EyeRotation" : EYE_ROTATION
+            },
+            "Info" : {
+                "Code" : "SA{:d}ER{:d}",
+                "Shape" : [NEW_SOURCE_ANGLE.size, EYE_ROTATION.size]
+            }
+        },
+        "INFO" : {
+            "SurfaceIndex" : rays_data["INFO"]["SurfaceIndex"]
+        }
+    }
+    return new_rays_data
