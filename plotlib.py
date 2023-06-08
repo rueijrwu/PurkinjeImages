@@ -18,7 +18,7 @@ class RaysData(object):
         self.rays = rays
         self.axis = axis
         self.code = code
-        if rays:
+        if rays is not None:
             self.shape = list(rays.shape[:-3])
         else:
             self.shape = None

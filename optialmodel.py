@@ -137,18 +137,19 @@ class PurkinjeModel:
         self.setMaxField(source_angle, set_viggenetting=set_viggenetting)
         
         if surfaces is None:
-            surfaces = range(self.nSurfs)
+            surfaces = np.array(range(self.nSurfs))
         else:
-            surfaces = np.array(surfaces, dtype=np.int32)
+            surfaces = np.array(surfaces, dtype=int)
 
         rays = np.zeros([surfaces.size, 3, 6], dtype=np.double)
 
         MFE = self.TheSystem.MFE
         for sIdx, surf in enumerate(surfaces):
+            surf = int(surf)
             for oIdx in range(1, 19):
                 # set surface
                 surfaceCell = MFE.GetOperandAt(oIdx).GetCellAt(2)
-                surfaceCell.set_IntegerValue(int(surf))
+                surfaceCell.set_IntegerValue(surf)
             
             # calculate ray
             MFE.CalculateMeritFunction()
